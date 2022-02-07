@@ -31,7 +31,9 @@ public class ReservationController {
 			reservation.getId();
 			return new ResponseEntity<>(reservation, HttpStatus.OK);
 		} catch (NullPointerException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			Map<String, Object> response = new HashMap<>();
+			response.put("error", "reservation not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -39,8 +41,8 @@ public class ReservationController {
 	public ResponseEntity<?> addReservation(@RequestBody Reservation reservation) {
 		reservationService.addOrUpdateReservation(reservation);
 		Map<String, Object> response = new HashMap<>();
-		response.put("status", "created");
-		return new ResponseEntity<>(response,HttpStatus.CREATED);
+		response.put("status", "reservation created");
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{email}")
@@ -52,14 +54,27 @@ public class ReservationController {
 			reservationService.addOrUpdateReservation(updatedReservation);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (NullPointerException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			Map<String, Object> response = new HashMap<>();
+			response.put("error", "reservation not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 	}
 
 	@DeleteMapping("/{email}")
-	public void deleteReservation(@PathVariable String email) {
+	public ResponseEntity<?> deleteReservation(@PathVariable String email) {
+		try {
+		Reservation reservation = reservationService.getReservation(email);
+		reservation.getId();
 		reservationService.deleteReservation(email);
-
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", "reservation deleted");
+		return new ResponseEntity<>(response, HttpStatus.OK);
+		}
+		catch(NullPointerException e) {
+			Map<String, Object> response = new HashMap<>();
+			response.put("error", "reservation not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		}
 	}
 
 }
